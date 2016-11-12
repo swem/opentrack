@@ -39,9 +39,11 @@ struct PointModel final
 
     mat22 P;
 
+    f focal_length;
+
     enum Model { Clip, Cap, Custom };
 
-    PointModel(settings_pt& s);
+    PointModel(settings_pt& s, f focal_length);
     void set_model(settings_pt& s);
     void get_d_order(const vec2* points, unsigned* d_order, const vec2& d) const;
 };
@@ -57,18 +59,18 @@ public:
     // track the pose using the set of normalized point coordinates (x pos in range -0.5:0.5)
     // f : (focal length)/(sensor width)
     // dt : time since last call
-    void track(const std::vector<vec2>& projected_points, const PointModel& model, f focal_length, bool dynamic_pose, int init_phase_timeout, int w, int h);
+    void track(const std::vector<vec2>& projected_points, const PointModel& model, bool dynamic_pose, int init_phase_timeout, int w, int h);
     Affine pose() { return X_CM; }
     vec2 project(const vec3& v_M, f focal_length);
     vec2 project(const vec3& v_M, f focal_length, const Affine& X_CM);
 
 private:
     // the points in model order
-    using PointOrder = std::array<vec2, 3>;
+    using PointOrder = std::array<vec2, PointModel::N_POINTS>;
 
     PointOrder find_correspondences(const vec2* projected_points, const PointModel &model);
-    PointOrder find_correspondences_previous(const vec2* points, const PointModel &model, f focal_length, int w, int h);
-    int POSIT(const PointModel& point_model, const PointOrder& order, f focal_length);  // The POSIT algorithm, returns the number of iterations
+    PointOrder find_correspondences_previous(const vec2* points, const PointModel &model, int w, int h);
+    int POSIT(const PointModel& point_model, const PointOrder& order);  // The POSIT algorithm, returns the number of iterations
 
     Affine X_CM; // trafo from model to camera
 
