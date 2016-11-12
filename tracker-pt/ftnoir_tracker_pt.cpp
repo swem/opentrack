@@ -123,8 +123,7 @@ void Tracker_PT::run()
             if (success)
             {
                 point_tracker.track(points,
-                                    PointModel(s),
-                                    fx,
+                                    PointModel(s, fx),
                                     s.dynamic_pose,
                                     s.init_phase_timeout,
                                     cam_info.res_x,

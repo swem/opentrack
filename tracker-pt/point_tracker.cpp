@@ -32,7 +32,7 @@ static void set_row(mat33& m, int i, const vec3& v)
     m(i,2) = v[2];
 }
 
-PointModel::PointModel(settings_pt& s)
+PointModel::PointModel(settings_pt& s, f focal_length_)
 {
     set_model(s);
     // calculate u
@@ -44,6 +44,7 @@ PointModel::PointModel(settings_pt& s)
     f s12 = M01.dot(M02);
     f s22 = M02.dot(M02);
     P = 1/(s11*s22-s12*s12) * mat22(s22, -s12, -s12,  s11);
+    focal_length = focal_length_;
 }
 
 void PointModel::set_model(settings_pt& s)
@@ -89,10 +90,10 @@ PointTracker::PointTracker() : init_phase(true)
 
 PointTracker::PointOrder PointTracker::find_correspondences_previous(const vec2* points,
                                                                      const PointModel& model,
-                                                                     f focal_length,
                                                                      int w,
                                                                      int h)
 {
+    const f focal_length = model.focal_length;
     PointTracker::PointOrder p;
     p[0] = project(vec3(0,0,0), focal_length);
     p[1] = project(model.M01, focal_length);
@@ -140,7 +141,6 @@ PointTracker::PointOrder PointTracker::find_correspondences_previous(const vec2*
 
 void PointTracker::track(const std::vector<vec2>& points,
                          const PointModel& model,
-                         f focal_length,
                          bool dynamic_pose,
                          int init_phase_timeout,
                          int w,
@@ -157,9 +157,9 @@ void PointTracker::track(const std::vector<vec2>& points,
     if (!dynamic_pose || init_phase)
         order = find_correspondences(points.data(), model);
     else
-        order = find_correspondences_previous(points.data(), model, focal_length, w, h);
+        order = find_correspondences_previous(points.data(), model, w, h);
 
-    if (POSIT(model, order, focal_length) != -1)
+    if (POSIT(model, order) != -1)
     {
         init_phase = false;
         t.start();
@@ -176,11 +176,26 @@ PointTracker::PointOrder PointTracker::find_correspondences(const vec2* points, 
     vec2 d(model.M01[0]-model.M02[0], model.M01[1]-model.M02[1]);
     model.get_d_order(points, point_d_order, d);
     // calculate d and d_order for simple freetrack-like point correspondence
-    vec2 pts[3] = {
+#if 0
+    // ignore Z component
+    vec2 pts[3] {
         vec2(0, 0),
         vec2(model.M01[0], model.M01[1]),
         vec2(model.M02[0], model.M02[1])
     };
+#else
+    // weak perspective projection
+    const f div = (model.M01[2] + model.M02[2]) / -3;
+
+    vec2 pts[3]
+    {
+        vec2(0, 0),
+        vec2(model.M01[0] * -(model.M01[2] - div) * div,
+             model.M01[1] * -(model.M01[2] - div) * div),
+        vec2(model.M02[0] * -(model.M02[2] - div) * div,
+             model.M02[1] * -(model.M02[2] - div) * div),
+    };
+#endif
     model.get_d_order(pts, model_d_order, d);
     // set correspondences
     PointOrder p;
@@ -190,7 +205,7 @@ PointTracker::PointOrder PointTracker::find_correspondences(const vec2* points, 
     return p;
 }
 
-int PointTracker::POSIT(const PointModel& model, const PointOrder& order, f focal_length)
+int PointTracker::POSIT(const PointModel& model, const PointOrder& order)
 {
     // POSIT algorithm for coplanar points as presented in
     // [Denis Oberkampf, Daniel F. DeMenthon, Larry S. Davis: "Iterative Pose Estimation Using Coplanar Feature Points"]
@@ -209,6 +224,8 @@ int PointTracker::POSIT(const PointModel& model, const PointOrder& order, f foca
     f old_epsilon_2 = 0;
     f epsilon_1 = 1;
     f epsilon_2 = 1;
+
+    const f focal_length = model.focal_length;
 
     vec3 I0, J0;
     vec2 I0_coeff, J0_coeff;
