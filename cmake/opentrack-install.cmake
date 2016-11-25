@@ -64,7 +64,7 @@ function(merge_translations)
         endforeach()
 
         add_custom_target(i18n-lang-${i}
-            COMMAND "${Qt5_DIR}/../../../bin/lrelease" -nounfinished -silent ${ts} -qm "${qm-output}"
+            COMMAND "${Qt5_DIR}/../../qt5/bin/lrelease" -nounfinished -silent ${ts} -qm "${qm-output}"
             DEPENDS ${deps}
         )
         list(APPEND all-deps "i18n-lang-${i}")

@@ -230,7 +230,7 @@ function(opentrack_boilerplate n)
 
     add_custom_target(${n}-i18n
         COMMAND cmake -E make_directory "${CMAKE_CURRENT_SOURCE_DIR}/lang"
-        COMMAND "${Qt5_DIR}/../../../bin/lupdate" -silent -recursive -no-obsolete -locations relative . -ts ${langs}
+        COMMAND "${Qt5_DIR}/../../qt5/bin/lupdate" -silent -recursive -no-obsolete -locations relative . -ts ${langs}
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 endfunction()

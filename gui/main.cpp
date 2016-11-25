@@ -6,8 +6,9 @@
 #   include <QFile>
 #   include <QString>
 #   include <QLocale>
-#   include <QTranslator>
 #endif
+
+#include <QTranslator>
 
 #include "migration/migration.hpp"
 #include "main-window.hpp"

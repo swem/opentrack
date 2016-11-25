@@ -1,8 +1,8 @@
 if(LINUX OR APPLE)
     set(SDK_XPLANE "" CACHE PATH "Path to X-Plane SDK")
-    opentrack_boilerplate(opentrack-xplane-plugin NO-QT)
 
     if(SDK_XPLANE)
+        opentrack_boilerplate(opentrack-xplane-plugin NO-QT)
         # probably librt already included
         install(FILES ${opentrack-xplane-plugin-c} DESTINATION "${opentrack-doc-src-pfx}/opentrack-xplane-plugin")
         target_include_directories(opentrack-xplane-plugin SYSTEM PUBLIC ${SDK_XPLANE}/CHeaders ${SDK_XPLANE}/CHeaders/XPLM)
@@ -18,7 +18,7 @@ if(LINUX OR APPLE)
         endif()
 
         if(CMAKE_COMPILER_IS_GNUCXX AND NOT CMAKE_COMPILER_IS_CLANG)
-            set_property(${begin} LINK_FLAGS "-undefined_warning")
+            set_property(${begin} LINK_FLAGS " -undefined_warning")
         endif()
 
         set_target_properties(opentrack-xplane-plugin PROPERTIES

@@ -1,4 +1,4 @@
-if(WIN32)
+if(WIN32 OR LINUX)
     opentrack_boilerplate(opentrack-tracker-rs-impl STATIC NO-QT SOURCES "${SDK_REALSENSE}/opensource/src/libpxc/libpxc.cpp")
     target_compile_definitions(opentrack-tracker-rs-impl PRIVATE -DUNICODE -D_UNICODE)
     target_include_directories(opentrack-tracker-rs-impl PRIVATE SYSTEM "${SDK_REALSENSE}/include")

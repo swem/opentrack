@@ -19,8 +19,6 @@ using namespace impl;
 
 GLWidget::GLWidget(QWidget *parent) : QWidget(parent)
 {
-    Q_INIT_RESOURCE(posewidget);
-
     front = QImage(QString(":/images/side1.png"));
     back = QImage(QString(":/images/side6.png"));
     rotateBy(0, 0, 0, 0, 0, 0);
